@@ -114,7 +114,7 @@ public class Price {
 
     @Override
     public String toString() {
-        return "model.Price{" +
+        return "Price{" +
                 "id=" + id +
                 ", code='" + code + '\'' +
                 ", number=" + number +

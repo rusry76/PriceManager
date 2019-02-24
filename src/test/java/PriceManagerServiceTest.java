@@ -5,9 +5,7 @@ import service.PriceManagerServiceImpl;
 import service.PriceManagerService;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -70,10 +68,7 @@ public class PriceManagerServiceTest {
         assertEquals(currentPrices, managerService.join(currentPrices, incomingPrices));
     }
 
-    /**
-     * Задание из таблицы
-     * @throws Exception
-     */
+    // Тест для проверки задания с таблицей
     @Test
     public void joinPricesExampleWithTable() throws Exception {
         currentPrices.add(new Price("122856", 1, 1, dateFormat.parse("01.01.2013 00:00:00"), dateFormat.parse("31.01.2013 23:59:59"), 11000));
@@ -82,18 +77,18 @@ public class PriceManagerServiceTest {
 
         incomingPrices.add(new Price("122856", 1, 1, dateFormat.parse("20.01.2013 00:00:00"), dateFormat.parse("20.02.2013 23:59:59"), 11000));
         incomingPrices.add(new Price("122856", 2, 1, dateFormat.parse("15.01.2013 00:00:00"), dateFormat.parse("25.01.2013 23:59:59"), 92000));
-        incomingPrices.add(new Price("6654", 1, 2, dateFormat.parse("12.01.2013 00:00:00"), dateFormat.parse("13.01.2013 23:59:59"), 4000));
+        incomingPrices.add(new Price("6654", 1, 2, dateFormat.parse("12.01.2013 00:00:00"), dateFormat.parse("13.01.2013 00:00:00"), 4000));
 
         result.add(new Price("122856", 1, 1, dateFormat.parse("01.01.2013 00:00:00"), dateFormat.parse("20.02.2013 23:59:59"), 11000));
-        result.add(new Price("122856", 2, 1, dateFormat.parse("10.01.2013 00:00:00"), dateFormat.parse("15.01.2013 23:59:59"), 99000));
+        result.add(new Price("122856", 2, 1, dateFormat.parse("10.01.2013 00:00:00"), dateFormat.parse("15.01.2013 00:00:00"), 99000));
         result.add(new Price("122856", 2, 1, dateFormat.parse("15.01.2013 00:00:00"), dateFormat.parse("25.01.2013 23:59:59"), 92000));
-        result.add(new Price("6654", 1, 2, dateFormat.parse("01.01.2013 00:00:00"), dateFormat.parse("12.02.2013 23:59:59"), 5000));
-        result.add(new Price("6654", 1, 2, dateFormat.parse("12.01.2013 00:00:00"), dateFormat.parse("13.01.2013 23:59:59"), 4000));
-        result.add(new Price("6654", 1, 2, dateFormat.parse("13.01.2013 00:00:00"), dateFormat.parse("31.01.2013 23:59:59"), 5000));
+        result.add(new Price("6654", 1, 2, dateFormat.parse("01.01.2013 00:00:00"), dateFormat.parse("12.01.2013 00:00:00"), 5000));
+        result.add(new Price("6654", 1, 2, dateFormat.parse("12.01.2013 00:00:00"), dateFormat.parse("13.01.2013 00:00:00"), 4000));
+        result.add(new Price("6654", 1, 2, dateFormat.parse("13.01.2013 00:00:00"), dateFormat.parse("31.01.2013 00:00:00"), 5000));
 
+        List<Price> actual= new ArrayList<>(managerService.join(currentPrices, incomingPrices));
 
-        System.out.println(managerService.join(currentPrices, incomingPrices));
-        assertEquals(result, managerService.join(currentPrices, incomingPrices));
+        assertTrue(result.containsAll(actual) && result.size() == actual.size());
     }
 
     //Тест для проверки ТЗ Пример 1
@@ -109,7 +104,9 @@ public class PriceManagerServiceTest {
         result.add(new Price("PC", 1, 1, dateFormat.parse("10.01.2019 00:00:00"), dateFormat.parse("20.01.2019 23:59:59"), 5000));
         result.add(new Price("PC", 1, 1, dateFormat.parse("20.01.2019 23:59:59"), dateFormat.parse("31.01.2019 23:59:59"), 10000));
 
-        assertEquals(result, managerService.join(currentPrices, incomingPrices));
+        List<Price> actual= new ArrayList<>(managerService.join(currentPrices, incomingPrices));
+
+        assertTrue(result.containsAll(actual) && result.size() == actual.size());
     }
 
     //Тест для проверки ТЗ Пример 2
@@ -128,11 +125,7 @@ public class PriceManagerServiceTest {
 
         List<Price> actual= new ArrayList<>(managerService.join(currentPrices, incomingPrices));
 
-        System.out.println(actual);
-
-        actual.sort((o1, o2) -> o1.getBegin().compareTo(o2.getEnd()));
-
-        assertEquals(result, actual);
+        assertTrue(result.containsAll(actual) && result.size() == actual.size());
     }
 
     //Тест для проверки ТЗ Пример 3
@@ -146,23 +139,44 @@ public class PriceManagerServiceTest {
         currentPrices.add(new Price("PC", 1, 1, dateFormat.parse("01.03.2019 00:00:00"), dateFormat.parse("31.03.2019 23:59:59"), 90000));
 
         incomingPrices.add(new Price("PC", 1, 1, dateFormat.parse("15.01.2019 00:00:00"), dateFormat.parse("15.02.2019 23:59:59"), 80000));
-        incomingPrices.add(new Price("PC", 1, 1, dateFormat.parse("16.02.2019 00:00:00"), dateFormat.parse("15.03.2019 23:59:59"), 85000));
+        incomingPrices.add(new Price("PC", 1, 1, dateFormat.parse("15.02.2019 23:59:59"), dateFormat.parse("15.03.2019 23:59:59"), 85000));
 
         result.add(new Price("PC", 1, 1, dateFormat.parse("01.01.2019 00:00:00"), dateFormat.parse("15.02.2019 23:59:59"), 80000));
-        result.add(new Price("PC", 1, 1, dateFormat.parse("16.02.2019 00:00:00"), dateFormat.parse("15.03.2019 23:59:59"), 85000));
+        result.add(new Price("PC", 1, 1, dateFormat.parse("15.02.2019 23:59:59"), dateFormat.parse("15.03.2019 23:59:59"), 85000));
         result.add(new Price("PC", 1, 1, dateFormat.parse("15.03.2019 23:59:59"), dateFormat.parse("31.03.2019 23:59:59"), 90000));
 
-        System.out.println(managerService.join(currentPrices, incomingPrices));
+        List<Price> actual= new ArrayList<>(managerService.join(currentPrices, incomingPrices));
+
+        assertTrue(result.containsAll(actual) && result.size() == actual.size());
     }
 
     @Test
-    public void testJoinLeftSameValue() throws Exception {
+    public void overlapLeftSideWithEqualValues() throws Exception {
         currentPrices.add(new Price("PC", 1, 1, dateFormat.parse("01.01.2019 00:00:00"), dateFormat.parse("31.01.2019 23:59:59"), 80000));
         currentPrices.add(new Price("PC", 1, 1, dateFormat.parse("01.02.2019 00:00:00"), dateFormat.parse("28.02.2019 23:59:59"), 87000));
 
-        incomingPrices.add(new Price("PC", 1, 1, dateFormat.parse("15.01.2019 00:00:00"), dateFormat.parse("15.02.2019 23:59:59"), 80000));
+        incomingPrices.add(new Price("PC", 1, 1, dateFormat.parse("01.12.2018 00:00:00"), dateFormat.parse("15.01.2019 23:59:59"), 80000));
 
-        System.out.println(managerService.join(currentPrices, incomingPrices));
+        result.add(new Price("PC", 1, 1, dateFormat.parse("01.12.2018 00:00:00"), dateFormat.parse("31.01.2019 23:59:59"), 80000));
+        result.add(new Price("PC", 1, 1, dateFormat.parse("01.02.2019 00:00:00"), dateFormat.parse("28.02.2019 23:59:59"), 87000));
 
+        List<Price> actual= new ArrayList<>(managerService.join(currentPrices, incomingPrices));
+
+        assertTrue(result.containsAll(actual) && result.size() == actual.size());
+    }
+
+    @Test
+    public void overlapRightWithEqualValues() throws Exception {
+        currentPrices.add(new Price("PC", 1, 1, dateFormat.parse("01.01.2019 00:00:00"), dateFormat.parse("31.01.2019 23:59:59"), 80000));
+        currentPrices.add(new Price("PC", 1, 1, dateFormat.parse("01.02.2019 00:00:00"), dateFormat.parse("28.02.2019 23:59:59"), 87000));
+
+        incomingPrices.add(new Price("PC", 1, 1, dateFormat.parse("15.02.2019 00:00:00"), dateFormat.parse("15.03.2019 23:59:59"), 87000));
+
+        result.add(new Price("PC", 1, 1, dateFormat.parse("01.01.2019 00:00:00"), dateFormat.parse("31.01.2019 23:59:59"), 80000));
+        result.add(new Price("PC", 1, 1, dateFormat.parse("01.02.2019 00:00:00"), dateFormat.parse("15.03.2019 23:59:59"), 87000));
+
+        List<Price> actual= new ArrayList<>(managerService.join(currentPrices, incomingPrices));
+
+        assertTrue(result.containsAll(actual) && result.size() == actual.size());
     }
 }

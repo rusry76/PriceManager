@@ -2,9 +2,7 @@ package service;
 
 import model.Price;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PriceManagerServiceImpl implements PriceManagerService {
@@ -25,60 +23,54 @@ public class PriceManagerServiceImpl implements PriceManagerService {
             return currentPrices;
         }
 
-        List<Price> result = new ArrayList<>();
+        List<Price> result = new ArrayList<>(currentPrices);
 
         for (Price incoming : incomingPrices) {
-            List<Price> prices = currentPrices.stream().filter(price -> isContain(price, incoming)).collect(Collectors.toList());
 
-            join(result, prices, incoming);
+            List<Price> prices = result.stream().filter(price -> isContain(price, incoming)).collect(Collectors.toList());
+
+            result.removeAll(prices);
+
+            joinPrices(result, prices, incoming);
         }
 
-        return result;
+        return new HashSet<>(result);
     }
 
-    private void joinPricesWithEqualValues(List<Price> result, List<Price> prices, Price incoming) {
+    private void joinPrices(List<Price> result, List<Price> prices, Price incoming) {
 
-        prices.stream().filter(price -> incoming.getInterval().overlapLeftSideOf(price.getInterval()) && price.getValue() == incoming.getValue())
-                .findFirst()
-                .ifPresent(price -> result.add(new Price(price, incoming.getBegin(), price.getEnd())));
-
-
-        prices.stream().filter(price -> incoming.getInterval().overlapRightSideOf(price.getInterval()) && price.getValue() == incoming.getValue())
-                .findFirst()
-                .ifPresent(price -> result.add(new Price(price, price.getBegin(), incoming.getEnd())));
-    }
-
-    private void join(List<Price> result, List<Price> prices, Price incoming) {
-
-        joinPricesWithEqualValues(result, prices, incoming);
-
-        joinPricesWithDifferentValues(result, prices, incoming);
-    }
-
-    private void joinPricesWithDifferentValues(List<Price> result, List<Price> prices, Price incoming) {
+        result.add(incoming);
 
         prices.stream().filter(price -> incoming.getInterval().overlapCenterOf(price.getInterval()))
                 .findFirst()
                 .ifPresent(price -> {
                     result.add(new Price(price, price.getBegin(), incoming.getBegin()));
-                    result.add(incoming);
                     result.add(new Price(price, incoming.getEnd(), price.getEnd()));
                 });
 
-        prices.stream().filter(price -> incoming.getInterval().overlapLeftSideOf(price.getInterval()) && price.getValue() != incoming.getValue())
+        prices.stream().filter(price -> incoming.getInterval().overlapLeftSideOf(price.getInterval()))
                 .findFirst()
                 .ifPresent(price -> {
-                    result.add(incoming);
-                    result.add(new Price(price, incoming.getEnd(), price.getEnd()));
+
+                    if (price.getValue() != incoming.getValue()) {
+                        result.add(new Price(price, incoming.getEnd(), price.getEnd()));
+                    } else {
+                        incoming.setEnd(price.getEnd());
+                    }
                 });
 
-        prices.stream().filter(price -> incoming.getInterval().overlapRightSideOf(price.getInterval()) && price.getValue() != incoming.getValue())
+        prices.stream().filter(price -> incoming.getInterval().overlapRightSideOf(price.getInterval()))
                 .findFirst()
                 .ifPresent(price -> {
-                    result.add(new Price(price, price.getBegin(), incoming.getBegin()));
-                    result.add(incoming);
+
+                    if (price.getValue() != incoming.getValue()) {
+                        result.add(new Price(price, price.getBegin(), incoming.getBegin()));
+                    } else {
+                        incoming.setBegin(price.getBegin());
+                    }
                 });
 
+        prices.stream().filter(price -> incoming.getInterval().outOf(price.getInterval())).forEachOrdered(result::add);
     }
 
     private boolean isContain(Price correct, Price incoming) {
